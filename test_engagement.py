@@ -1,9 +1,10 @@
 from engagement_manager import EngagementManager
 import time
 import os
-
-RECRUITER_EMAIL = "dkcan00@gmail.com"
-APP_PASSWORD = "wlxp plou hajt dvpw"
+from dotenv import load_dotenv
+load_dotenv()
+RECRUITER_EMAIL = os.getenv("EMAIL")
+APP_PASSWORD = os.getenv("APP_PASSWORD")
 CANDIDATE_EMAIL = "dinkar.gdsc.ai@gmail.com"
 
 

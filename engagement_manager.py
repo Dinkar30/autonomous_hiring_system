@@ -94,3 +94,5 @@ class EngagementManager:
 
                     mail.store(num, '+FLAGS', '\\Seen')
                     print(f"SUCCESS: Replied to candidate {candidate_email}")                     
+
+

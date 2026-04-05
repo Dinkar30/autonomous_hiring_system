@@ -1,13 +1,16 @@
 import re 
 import requests
+import os
+from dotenv import load_dotenv
+load_dotenv()
 class HiringAgent:
-    def __init__(self):
+    def __init__(self,github_token=None):
         self.ai_patterns = [
             "rapidly evolving landscape", "I'd be happy to assist", "comprehensive overview", "leveraging my expertise" ,"it's important to note", "as an ai model"
         ]
         self.tech_keywords = {'python','playwright','fastapi','redis','docker','async','scraping','agent'}
         self.action_keywords = {'implemented','optimized','solved','debugged','built','fixed'}
-        self.headers = {"Authorization":f"token: {github_token}"} if github_token else {} # to avoid github rate limit 
+        self.headers = {"Authorization": f"token {github_token}"} if github_token else {} # to avoid github rate limit 
     
     def clean_input(self,data):
         return {
@@ -105,6 +108,20 @@ class HiringAgent:
 
     
 
+if __name__ == "__main__":
+    my_token = os.getenv("GITHUB_TOKEN")
+    agent = HiringAgent(github_token=my_token) 
+    
+    # Test with 3 types of candidates
+    test_data = [
+        {"name": "Real Dev", "github": "https://github.com/realuser/project", "answer": "I built a scraper using Playwright and solved rate limits."},
+        {"name": "AI Bot", "github": "https://github.com/bot", "answer": "In the rapidly evolving landscape of AI, I leverage my expertise..."},
+        {"name": "Empty", "github": "", "answer": ""}
+    ]
+
+    for data in test_data:
+        result = agent.evaluate_candidate(data)
+        print(f"Candidate: {result['name']} | Score: {result['score']} | Tier: {result['tier']}")
         
 
 

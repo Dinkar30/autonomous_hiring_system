@@ -1,26 +1,36 @@
 
-# Autonomous Hiring Agent Prototype - GenoTek Challenge
+# Autonomous Hiring Agent - GenoTek Submission
 
-A modular, state-driven AI agent designed to automate end-to-end recruitment on platforms like Internshala.
+## 📦 Installation & Setup
+1. Clone the repository.
+2. Install dependencies:
+   ```bash
+   pip install requests python-dotenv sentence-transformers
+   ```
+3. Create a `.env` file in the root directory (refer to `.env.example`).
+4. Enable **IMAP** in your Gmail settings and generate an **App Password**.
 
-## 🚀 Core Architecture
-This system is built as a **State-Machine**. Unlike simple linear scripts, it maintains candidate context across multiple rounds of interaction.
+## 🚀 Running the Modules
 
-- **Scoring Engine (`agent_prototype.py`):** Uses a heuristic weighting system to evaluate Technical Density (Tech Stack + Action Verbs) and GitHub quality (Fork-Ratio analysis).
-- **Engagement Manager (`engagement_manager.py`):** A stateful IMAP/SMTP handler that tracks conversation history and manages email threading via `References` headers.
-- **Anti-Cheat Logic (`anticheat.py`):** Implements semantic similarity analysis to detect LLM-generated templates.
-- **Self-Learning Loop:** Analyzes "Fast-Tracked" candidates to update high-signal keyword weights dynamically.
+### 1. Scoring & Intelligence Engine
+To test the candidate ranking, GitHub analysis, and anti-cheat logic:
+```bash
+python agent_prototype.py
+```
 
-## 🛠️ Key Findings & Lessons Learned
-During development and live-testing, I identified several "Production-level" hurdles:
+### 2. Engagement & Threading Test
+To run a live simulation of the multi-round threaded email system:
+1. Run the test script: `python test_engagement.py`
+2. Follow the terminal prompts to reply to the automated outreach.
+3. Observe the agent identifying your technical keywords and sending a threaded follow-up.
 
-1. **State Poisoning:** In early tests, the IMAP fetch was too broad, causing the agent to "recruit" system notifications (Google/Instagram). I solved this by implementing a **Targeted Polling** mechanism that only processes whitelisted candidate addresses.
-2. **Access Obstacles:** Identified **reCAPTCHA Enterprise (Invisible)** on the Internshala login. Proposed a **Session-Injection** strategy to maintain persistent headless access.
-3. **GitHub Signal Noise:** Discovered that 80%+ of applicants are "Tutorial Collectors." Developed a **Fork-Ratio** algorithm to verify original code authorship.
-4. **Email Threading:** Identified that `In-Reply-To` headers are insufficient for modern Gmail threading; implemented full `References` chain persistence.
+### 3. Anti-Cheat Semantic Check
+To verify the LLM-similarity detection:
+```bash
+python anticheat.py
+```
 
-## 📦 Setup & Run
-1. Install requirements: `pip install requests sentence-transformers`
-2. Configure credentials in `engagement_manager.py`.
-3. Run the evaluation: `python agent_prototype.py`
-4. Run the email test: `python test_engagement.py`
+## 🧠 Technical Highlights
+- **Stateful Threading:** Uses `References` headers to maintain 100% thread continuity in Gmail.
+- **Heuristic Scoring:** Weights **Technical Density** (Action Verbs + Tech Stack) against **GitHub Fork-Ratio**.
+- **Conflict Handling:** Specifically designed to ignore "System Noise" (Google/Instagram notifications) using a **Targeted Whitelist Polling** strategy.
