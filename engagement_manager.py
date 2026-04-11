@@ -3,13 +3,14 @@ from email.mime.text import MIMEText
 from email.utils import make_msgid, parseaddr
 import imaplib, email
 import json,os
+import database as db
 
 class EngagementManager:
     def __init__(self, smtp_user, smtp_password):
         self.smtp_user = smtp_user
         self.smtp_password = smtp_password
         self.candidate_states = {}
-        self._load_state()
+        
 
     def _save_state(self):
         with open("candidate_states.json", "w") as f:
@@ -79,8 +80,9 @@ class EngagementManager:
             mail.login(self.smtp_user,self.smtp_password)
             mail.select("inbox")
          
-            for candidate_email in self.candidate_states.keys():
-                search_query = f'(UNSEEN FROM "{candidate_email}")'
+            candidate_emails = db.get_all_active_emails() 
+            for email_address in candidate_emails:
+                search_query = f'(UNSEEN FROM "{email_address}")'
                 _, data = mail.search(None, search_query)
                 for num in data[0].split():
                     _, msg_data = mail.fetch(num, '(RFC822)')
@@ -88,11 +90,18 @@ class EngagementManager:
                     body = self.get_body(msg)
                     _, follow_up = self.analyze_reply(body)
                 
+                    candidate_record = db.get_candidate(email_address)
                     # need prev message id for threading
-                    prev_id = self.candidate_states.get(candidate_email, {}).get("last_msg_id")
-                    self.send_threaded_mail(candidate_email, "Re: Your Application", follow_up, prev_id)       
+                    prev_id = candidate_record['last_msg_id']
+                    new_id = self.send_threaded_mail(email_address,msg['Subject'], follow_up, prev_id)       
 
+                    db.update_mail_state(
+                        email_address, 
+                        new_id, 
+                        candidate_record['references_thread'], 
+                        candidate_record['round'] + 1
+                    )
                     mail.store(num, '+FLAGS', '\\Seen')
-                    print(f"SUCCESS: Replied to candidate {candidate_email}")                     
+                    print(f"SUCCESS: Replied to candidate {email_address}")                     
 
 
